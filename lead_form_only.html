@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piramal Finance - Loan Inquiry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #003366;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #002244;
+        }
+        .success-message {
+            display: none;
+            background-color: #dff0d8;
+            color: #3c763d;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Piramal Finance</h2>
+        
+        <form id="leadForm">
+            <input type="hidden" id="rmId" name="rmId" value="">
+            <input type="hidden" id="openTimestamp" name="openTimestamp" value="">
+            <input type="hidden" id="adminEmail" name="adminEmail" value="vishal.dubey2@piramal.com">
+            
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" placeholder="10 digits">
+            </div>
+            
+            <div class="form-group">
+                <label for="productType">Product Type</label>
+                <select id="productType" name="productType" required>
+                    <option value="">Select Product</option>
+                    <option value="Home Loan">Home Loan</option>
+                    <option value="Personal Loan">Personal Loan</option>
+                    <option value="Business Loan">Business Loan</option>
+                    <option value="Others">Others</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Required Amount (₹)</label>
+                <input type="number" id="amount" name="amount" required min="100000">
+            </div>
+            
+            <div class="form-group">
+                <label for="pincode">Pincode</label>
+                <input type="text" id="pincode" name="pincode" required pattern="[0-9]{6}" placeholder="6 digits">
+            </div>
+            
+            <button type="submit">Submit Inquiry</button>
+        </form>
+        
+        <div class="success-message" id="successMessage">
+            Thank you for your inquiry! Our representative will contact you shortly.
+        </div>
+    </div>
+
+    <script>
+        // Get RM ID from URL parameter
+        function getParameterByName(name) {
+            const url = window.location.href;
+            name = name.replace(/[\[\]]/g, '\\$&');
+            const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+            const results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+        
+        // Initialize form with RM ID from URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const rmId = getParameterByName('rm_id') || '';
+            document.getElementById('rmId').value = rmId;
+            
+            // Record form open timestamp
+            const openTimestamp = new Date().toISOString();
+            document.getElementById('openTimestamp').value = openTimestamp;
+            
+            // Log form open event
+            console.log('Form opened for RM:', rmId, 'at', openTimestamp);
+            
+            // Store form open event
+            let formOpens = JSON.parse(localStorage.getItem('formOpens') || '[]');
+            formOpens.push({
+                rmId: rmId,
+                timestamp: openTimestamp
+            });
+            localStorage.setItem('formOpens', JSON.stringify(formOpens));
+        });
+        
+        // Handle lead form submission
+        document.getElementById('leadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                rmId: document.getElementById('rmId').value,
+                openTimestamp: document.getElementById('openTimestamp').value,
+                submitTimestamp: new Date().toISOString(),
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                productType: document.getElementById('productType').value,
+                amount: document.getElementById('amount').value,
+                pincode: document.getElementById('pincode').value
+            };
+            
+            // Log form submission
+            console.log('Form submitted:', formData);
+            
+            // Store submission data
+            let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            submissions.push(formData);
+            localStorage.setItem('submissions', JSON.stringify(submissions));
+            
+            // Simulate RM notification
+            const notificationTimestamp = new Date().toISOString();
+            console.log('RM notified at:', notificationTimestamp);
+            
+            // Store notification data
+            let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            notifications.push({
+                rmId: formData.rmId,
+                leadId: submissions.length, // Simple ID for demo
+                timestamp: notificationTimestamp
+            });
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            
+            // Send email notification
+            const adminEmail = document.getElementById('adminEmail').value;
+            let recipientEmails = adminEmail;
+            
+            // If RM ID looks like an email, add it to recipients
+            if (formData.rmId && formData.rmId.includes('@')) {
+                recipientEmails += `;${formData.rmId}`;
+            }
+            
+            // Create email subject and body
+            const emailSubject = `New Lead: ${formData.name} - ${formData.productType}`;
+            const emailBody = `
+New lead submitted:
+
+Name: ${formData.name}
+Phone: ${formData.phone}
+Product: ${formData.productType}
+Amount: ₹${parseInt(formData.amount).toLocaleString('en-IN')}
+Pincode: ${formData.pincode}
+Submitted: ${new Date(formData.submitTimestamp).toLocaleString()}
+
+This is an automated notification from the Piramal Finance Lead Generation System.
+`;
+            
+            // Create mailto link
+            const mailtoLink = `mailto:${encodeURIComponent(recipientEmails)}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('leadForm').reset();
+            
+            // Scroll to success message
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            
+            // Open email client after a short delay
+            setTimeout(function() {
+                window.open(mailtoLink, '_blank');
+            }, 1000);
+            
+            // Hide success message after 5 seconds
+            setTimeout(function() {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
