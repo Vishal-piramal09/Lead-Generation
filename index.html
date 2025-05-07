@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piramal Finance - Loan Inquiry</title>
+    <title>Lead Generation Admin Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,15 +12,82 @@
             background-color: #f5f5f5;
         }
         .container {
-            max-width: 600px;
+            max-width: 1200px;
             margin: 0 auto;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        h1, h2, h3 {
+        h1, h2 {
             color: #003366;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 5px;
+            border: 1px solid transparent;
+            border-bottom: none;
+        }
+        .tab.active {
+            background-color: white;
+            border-color: #ddd;
+            border-radius: 5px 5px 0 0;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .stat-card h3 {
+            margin-top: 0;
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .stat-card p {
+            margin-bottom: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #003366;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
         }
         .form-group {
             margin-bottom: 15px;
@@ -44,185 +111,392 @@
             padding: 10px 15px;
             border-radius: 4px;
             cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
         }
         button:hover {
             background-color: #002244;
         }
-        .success-message {
-            display: none;
-            background-color: #dff0d8;
-            color: #3c763d;
-            padding: 15px;
-            border-radius: 4px;
+        .qr-display {
             margin-top: 20px;
             text-align: center;
         }
+        .export-btn {
+            margin-top: 20px;
+            background-color: #4CAF50;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-sent {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .qr-generator {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        #qrcode img {
+            margin: 0 auto;
+            display: block;
+        }
+        .note {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
     </style>
+    <!-- Include QR Code Generator Library -->
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Piramal Finance</h2>
+        <h1>Lead Generation Admin Dashboard</h1>
         
-        <form id="leadForm">
-            <input type="hidden" id="rmId" name="rmId" value="">
-            <input type="hidden" id="openTimestamp" name="openTimestamp" value="">
-            <input type="hidden" id="adminEmail" name="adminEmail" value="vishal.dubey2@piramal.com">
-            
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" placeholder="10 digits">
-            </div>
-            
-            <div class="form-group">
-                <label for="productType">Product Type</label>
-                <select id="productType" name="productType" required>
-                    <option value="">Select Product</option>
-                    <option value="Home Loan">Home Loan</option>
-                    <option value="Personal Loan">Personal Loan</option>
-                    <option value="Business Loan">Business Loan</option>
-                    <option value="Others">Others</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="amount">Required Amount (₹)</label>
-                <input type="number" id="amount" name="amount" required min="100000">
-            </div>
-            
-            <div class="form-group">
-                <label for="pincode">Pincode</label>
-                <input type="text" id="pincode" name="pincode" required pattern="[0-9]{6}" placeholder="6 digits">
-            </div>
-            
-            <button type="submit">Submit Inquiry</button>
-        </form>
+        <div class="note">
+            <strong>Note:</strong> This is the admin dashboard for generating QR codes and viewing lead data. 
+            The lead form is separate and will be shown to customers when they scan the QR code.
+        </div>
         
-        <div class="success-message" id="successMessage">
-            Thank you for your inquiry! Our representative will contact you shortly.
+        <div class="tabs">
+            <div class="tab active" data-tab="dashboard">Dashboard</div>
+            <div class="tab" data-tab="qr-generator">QR Generator</div>
+            <div class="tab" data-tab="leads">Lead Details</div>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total Form Opens</h3>
+                    <p id="totalOpens">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Submissions</h3>
+                    <p id="totalSubmissions">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Conversion Rate</h3>
+                    <p id="conversionRate">0%</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total RMs</h3>
+                    <p id="totalRMs">0</p>
+                </div>
+            </div>
+            
+            <h2>Recent Leads</h2>
+            <table id="recentLeadsTable">
+                <thead>
+                    <tr>
+                        <th>Lead ID</th>
+                        <th>Customer Name</th>
+                        <th>Product Type</th>
+                        <th>Amount</th>
+                        <th>RM Contact</th>
+                        <th>Submitted At</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recentLeadsBody">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+            
+            <button class="export-btn" onclick="exportData()">Export Data</button>
+        </div>
+        
+        <!-- QR Generator Tab -->
+        <div class="tab-content" id="qr-generator">
+            <h2>Generate QR Code for RM</h2>
+            
+            <div class="qr-generator">
+                <div class="form-group">
+                    <label for="rmIdInput">RM Contact</label>
+                    <input type="text" id="rmIdInput" placeholder="Enter RM Contact (e.g., email address)">
+                    <small>Use email address to enable email notifications</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="baseUrlInput">Base URL</label>
+                    <input type="text" id="baseUrlInput" value="https://vishal-piramal09.github.io/Lead-Generation/" placeholder="Enter the base URL for the lead form">
+                    <small>This should be the URL where your lead_form_only.html file is hosted</small>
+                </div>
+                
+                <button onclick="generateQR()">Generate QR Code</button>
+                
+                <div class="qr-display">
+                    <div id="qrcode"></div>
+                    <p id="qrUrl"></p>
+                    <button id="downloadQR" style="display: none; margin-top: 10px;">Download QR Code</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leads Tab -->
+        <div class="tab-content" id="leads">
+            <h2>All Lead Details</h2>
+            <table id="allLeadsTable">
+                <thead>
+                    <tr>
+                        <th>Lead ID</th>
+                        <th>Customer Name</th>
+                        <th>Phone</th>
+                        <th>Product Type</th>
+                        <th>Amount</th>
+                        <th>Pincode</th>
+                        <th>RM Contact</th>
+                        <th>Form Opened</th>
+                        <th>Submitted</th>
+                        <th>RM Notified</th>
+                    </tr>
+                </thead>
+                <tbody id="allLeadsBody">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+            
+            <button onclick="clearData()" style="background-color: #f44336; margin-top: 20px;">Clear All Data</button>
         </div>
     </div>
 
     <script>
-        // Get RM ID from URL parameter
-        function getParameterByName(name) {
-            const url = window.location.href;
-            name = name.replace(/[\[\]]/g, '\\$&');
-            const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-            const results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // If switching to dashboard or leads tab, load data
+                if (tabId === 'dashboard' || tabId === 'leads') {
+                    loadData();
+                }
+            });
+        });
+
+        // Load data from localStorage
+        function loadData() {
+            const formOpens = JSON.parse(localStorage.getItem('formOpens') || '[]');
+            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            
+            // Update dashboard stats
+            document.getElementById('totalOpens').textContent = formOpens.length;
+            document.getElementById('totalSubmissions').textContent = submissions.length;
+            
+            // Calculate conversion rate
+            const conversionRate = formOpens.length > 0 
+                ? ((submissions.length / formOpens.length) * 100).toFixed(1) 
+                : '0';
+            document.getElementById('conversionRate').textContent = conversionRate + '%';
+            
+            // Count unique RMs
+            const uniqueRMs = new Set();
+            formOpens.forEach(open => uniqueRMs.add(open.rmId));
+            document.getElementById('totalRMs').textContent = uniqueRMs.size;
+            
+            // Populate recent leads table (last 5)
+            const recentLeadsBody = document.getElementById('recentLeadsBody');
+            recentLeadsBody.innerHTML = '';
+            
+            const recentSubmissions = [...submissions].reverse().slice(0, 5);
+            
+            recentSubmissions.forEach((submission, index) => {
+                const row = document.createElement('tr');
+                
+                // Find notification for this lead
+                const notification = notifications.find(n => n.leadId === submissions.indexOf(submission) + 1);
+                
+                row.innerHTML = `
+                    <td>${submissions.indexOf(submission) + 1}</td>
+                    <td>${submission.name}</td>
+                    <td>${submission.productType}</td>
+                    <td>₹${parseInt(submission.amount).toLocaleString('en-IN')}</td>
+                    <td>${submission.rmId}</td>
+                    <td class="timestamp">${formatDate(submission.submitTimestamp)}</td>
+                    <td><span class="status status-sent">Sent to RM</span></td>
+                `;
+                
+                recentLeadsBody.appendChild(row);
+            });
+            
+            // Populate all leads table
+            const allLeadsBody = document.getElementById('allLeadsBody');
+            allLeadsBody.innerHTML = '';
+            
+            submissions.forEach((submission, index) => {
+                const row = document.createElement('tr');
+                
+                // Find notification for this lead
+                const notification = notifications.find(n => n.leadId === index + 1);
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${submission.name}</td>
+                    <td>${submission.phone}</td>
+                    <td>${submission.productType}</td>
+                    <td>₹${parseInt(submission.amount).toLocaleString('en-IN')}</td>
+                    <td>${submission.pincode}</td>
+                    <td>${submission.rmId}</td>
+                    <td class="timestamp">${formatDate(submission.openTimestamp)}</td>
+                    <td class="timestamp">${formatDate(submission.submitTimestamp)}</td>
+                    <td class="timestamp">${notification ? formatDate(notification.timestamp) : 'N/A'}</td>
+                `;
+                
+                allLeadsBody.appendChild(row);
+            });
         }
         
-        // Initialize form with RM ID from URL
-        document.addEventListener('DOMContentLoaded', function() {
-            const rmId = getParameterByName('rm_id') || '';
-            document.getElementById('rmId').value = rmId;
-            
-            // Record form open timestamp
-            const openTimestamp = new Date().toISOString();
-            document.getElementById('openTimestamp').value = openTimestamp;
-            
-            // Log form open event
-            console.log('Form opened for RM:', rmId, 'at', openTimestamp);
-            
-            // Store form open event
-            let formOpens = JSON.parse(localStorage.getItem('formOpens') || '[]');
-            formOpens.push({
-                rmId: rmId,
-                timestamp: openTimestamp
-            });
-            localStorage.setItem('formOpens', JSON.stringify(formOpens));
-        });
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
         
-        // Handle lead form submission
-        document.getElementById('leadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Generate QR code
+        function generateQR() {
+            const rmId = document.getElementById('rmIdInput').value.trim();
+            const baseUrl = document.getElementById('baseUrlInput').value.trim();
             
-            // Get form data
-            const formData = {
-                rmId: document.getElementById('rmId').value,
-                openTimestamp: document.getElementById('openTimestamp').value,
-                submitTimestamp: new Date().toISOString(),
-                name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
-                productType: document.getElementById('productType').value,
-                amount: document.getElementById('amount').value,
-                pincode: document.getElementById('pincode').value
-            };
-            
-            // Log form submission
-            console.log('Form submitted:', formData);
-            
-            // Store submission data
-            let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-            submissions.push(formData);
-            localStorage.setItem('submissions', JSON.stringify(submissions));
-            
-            // Simulate RM notification
-            const notificationTimestamp = new Date().toISOString();
-            console.log('RM notified at:', notificationTimestamp);
-            
-            // Store notification data
-            let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-            notifications.push({
-                rmId: formData.rmId,
-                leadId: submissions.length, // Simple ID for demo
-                timestamp: notificationTimestamp
-            });
-            localStorage.setItem('notifications', JSON.stringify(notifications));
-            
-            // Send email notification
-            const adminEmail = document.getElementById('adminEmail').value;
-            let recipientEmails = adminEmail;
-            
-            // If RM ID looks like an email, add it to recipients
-            if (formData.rmId && formData.rmId.includes('@')) {
-                recipientEmails += `;${formData.rmId}`;
+            if (!rmId) {
+                alert('Please enter an RM Contact');
+                return;
             }
             
-            // Create email subject and body
-            const emailSubject = `New Lead: ${formData.name} - ${formData.productType}`;
-            const emailBody = `
-New lead submitted:
-
-Name: ${formData.name}
-Phone: ${formData.phone}
-Product: ${formData.productType}
-Amount: ₹${parseInt(formData.amount).toLocaleString('en-IN')}
-Pincode: ${formData.pincode}
-Submitted: ${new Date(formData.submitTimestamp).toLocaleString()}
-
-This is an automated notification from the Piramal Finance Lead Generation System.
-`;
+            if (!baseUrl) {
+                alert('Please enter a base URL');
+                return;
+            }
             
-            // Create mailto link
-            const mailtoLink = `mailto:${encodeURIComponent(recipientEmails)}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            const url = `${baseUrl}?rm_id=${encodeURIComponent(rmId)}`;
+            document.getElementById('qrUrl').textContent = url;
             
-            // Show success message
-            document.getElementById('successMessage').style.display = 'block';
-            document.getElementById('leadForm').reset();
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = '';
             
-            // Scroll to success message
-            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            try {
+                // Generate QR code using QRCode.js library
+                new QRCode(document.getElementById("qrcode"), {
+                    text: url,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                console.log('QR code generated!');
+                
+                // Show download button
+                const downloadBtn = document.getElementById('downloadQR');
+                downloadBtn.style.display = 'inline-block';
+                
+                // Set up download functionality
+                downloadBtn.onclick = function() {
+                    try {
+                        // Get the QR code image
+                        const img = document.querySelector('#qrcode img');
+                        if (!img) {
+                            alert('QR code image not found. Please generate it again.');
+                            return;
+                        }
+                        
+                        // Create a canvas element
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        
+                        // Draw the image onto the canvas
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, img.width, img.height);
+                        
+                        // Create a link to download the canvas as an image
+                        const link = document.createElement('a');
+                        link.download = `QR_${rmId}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        alert('QR code downloaded successfully!');
+                    } catch (err) {
+                        console.error('Download error:', err);
+                        alert('Error downloading QR code: ' + err.message);
+                        
+                        // Alternative download method
+                        alert('Please try right-clicking on the QR code image and select "Save Image As..."');
+                    }
+                };
+            } catch (err) {
+                console.error('QR generation error:', err);
+                alert('Error generating QR code: ' + err.message + '\nPlease make sure you have a stable internet connection.');
+            }
+        }
+        
+        // Export data as CSV
+        function exportData() {
+            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
             
-            // Open email client after a short delay
-            setTimeout(function() {
-                window.open(mailtoLink, '_blank');
-            }, 1000);
+            if (submissions.length === 0) {
+                alert('No data to export');
+                return;
+            }
             
-            // Hide success message after 5 seconds
-            setTimeout(function() {
-                document.getElementById('successMessage').style.display = 'none';
-            }, 5000);
-        });
+            // Create CSV content
+            let csvContent = 'Lead ID,Customer Name,Phone,Product Type,Amount,Pincode,RM Contact,Form Opened,Submitted\n';
+            
+            submissions.forEach((submission, index) => {
+                csvContent += `${index + 1},`;
+                csvContent += `"${submission.name}",`;
+                csvContent += `${submission.phone},`;
+                csvContent += `"${submission.productType}",`;
+                csvContent += `${submission.amount},`;
+                csvContent += `${submission.pincode},`;
+                csvContent += `${submission.rmId},`;
+                csvContent += `"${submission.openTimestamp}",`;
+                csvContent += `"${submission.submitTimestamp}"\n`;
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'lead_data.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Clear all data
+        function clearData() {
+            if (confirm('Are you sure you want to clear all lead data? This cannot be undone.')) {
+                localStorage.removeItem('formOpens');
+                localStorage.removeItem('submissions');
+                localStorage.removeItem('notifications');
+                loadData();
+                alert('All data has been cleared');
+            }
+        }
+        
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
